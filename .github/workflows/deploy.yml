@@ -20,7 +20,9 @@ jobs:
     environment: staging
     steps:
       - name: Deploy to staging
-        run: echo "Running staging job"
+        run: |
+          echo "Running staging job"
+          echo "ENVIRONMENT: ${{ vars.ENVIRONMENT }}"
 
   production:
     name: Production Deployment
@@ -29,4 +31,6 @@ jobs:
     environment: production
     steps:
       - name: Deploy to production
-        run: echo "Running production job"
+        run: |
+          echo "Running production job"
+          echo "ENVIRONMENT: ${{ vars.ENVIRONMENT }}"
