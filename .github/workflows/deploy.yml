@@ -12,14 +12,25 @@ jobs:
     steps:
       - name: Run integration tests
         run: echo "Running integration job"
-
-  deploy:
-    name: Deploy to ${{ matrix.environment }}
+  
+  staging:
+    name: Deploy to staging
+    environment: staging
     runs-on: ubuntu-latest
     needs: integration
+    steps:
+      - name: Deploy to staging
+        run: |
+          echo "Running staging job"
+          echo "ENVIRONMENT: ${{ vars.ENVIRONMENT }}"
+
+  production:
+    name: Deploy to ${{ matrix.environment }}
+    runs-on: ubuntu-latest
+    needs: staging
     strategy:
       matrix:
-        environment: [staging, production]
+        environment: [production, production2]
     environment: ${{ matrix.environment }}
     steps:
       - name: Deploy to ${{ matrix.environment }}
