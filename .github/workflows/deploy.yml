@@ -36,4 +36,5 @@ jobs:
       - name: Deploy to ${{ matrix.environment }}
         run: |
           echo "Running ${{ matrix.environment }} job"
-          echo "ENVIRONMENT: ${{ vars.ENVIRONMENT }}"
+          echo "Here are some variables:"
+          echo "  ENVIRONMENT: ${{ vars.ENVIRONMENT }}"
