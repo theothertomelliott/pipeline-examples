@@ -8,10 +8,10 @@ from environment_utils import create_environment
 config = pulumi.Config("github")
 github_token = config.require_secret("token")
 
-# Create sandbox environment (no protection rule)
-sandbox_env, _ = create_environment(
-    name="sandbox",
-    variables={"ENVIRONMENT": "sandbox"},
+# Create staging environment (no protection rule)
+staging_env, _ = create_environment(
+    name="staging",
+    variables={"ENVIRONMENT": "staging"},
 )
 
 # Create production environments with protection rule
@@ -26,7 +26,7 @@ for i in range(1, 4):
     production_envs.append((env, protection))
 
 # Export environment names
-pulumi.export('sandboxEnvironment', sandbox_env.environment)
+pulumi.export('stagingEnvironment', staging_env.environment)
 pulumi.export('productionEnvironments', [env.environment for env, _ in production_envs])
 
 # Create a GitHub repository variable for production environments
