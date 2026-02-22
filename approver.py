@@ -22,11 +22,6 @@ app = modal.App(name="github-approver", image=image)
     docs=True  # adds interactive documentation in the browser
 )
 def handle(request: Request, body: dict):
-    headers = dict(request.headers)
-    print(json.dumps(headers, indent=4, sort_keys=True))
-
-    print(json.dumps(body, indent=4, sort_keys=True))
-
     # Get App ID and PEM from env var
     client_id = os.environ["CLIENT_ID"] 
     signing_key = os.environ["PRIVATE_KEY"]
@@ -83,54 +78,56 @@ def handle(request: Request, body: dict):
         token_data = response.json()
         install_token = token_data.get("token")
         
-        # Get deployment callback URL from webhook payload
-        callback_url = body.get("deployment_callback_url")
-        if not callback_url:
-            print("No deployment callback URL found in webhook payload")
-            return "ERROR: No callback URL"
-        
-        # Get environment name from webhook payload
-        environment_name = body.get("environment")
-        if not environment_name:
-            print("No environment name found in webhook payload")
-            return "ERROR: No environment name"
-        
-        # For demo purposes, automatically approve the deployment
-        # In a real app, you might check conditions, ask for approval, etc.
-        approval_payload = {
-            "environment_name": environment_name,
-            "state": "approved",
-            "comment": "Deployment approved by Pipeline Approvals app"
-        }
-        
-        # Use the install token to approve the deployment
-        approval_headers = {
-            "Accept": "application/vnd.github+json",
-            "Authorization": f"Bearer {install_token}",
-            "X-GitHub-Api-Version": "2022-11-28",
-            "Content-Type": "application/json"
-        }
-        
-        try:
-            approval_response = requests.post(
-                callback_url, 
-                headers=approval_headers, 
-                json=approval_payload
-            )
-            
-            if approval_response.status_code == 200:
-                print(f"Deployment approved successfully!")
-                return "Deployment approved"
-            else:
-                print(f"Unexpected status code: {approval_response.status_code}")
-                return f"ERROR: Unexpected status {approval_response.status_code}"
-            
-        except requests.exceptions.RequestException as e:
-            print(f"Error approving deployment: {e}")
-            print(f"Approval response: {approval_response.text if 'approval_response' in locals() else 'No response'}")
-            return "ERROR: Failed to approve deployment"
-        
     except requests.exceptions.RequestException as e:
         print(f"Error generating install token: {e}")
         print(f"Response: {response.text if 'response' in locals() else 'No response'}")
         return "ERROR: Failed to generate install token"
+    
+    # Get deployment callback URL from webhook payload
+    callback_url = body.get("deployment_callback_url")
+    if not callback_url:
+        print("No deployment callback URL found in webhook payload")
+        return "ERROR: No callback URL"
+    
+    # Get environment name from webhook payload
+    environment_name = body.get("environment")
+    if not environment_name:
+        print("No environment name found in webhook payload")
+        return "ERROR: No environment name"
+    
+    # For demo purposes, automatically approve the deployment
+    # In a real app, you might check conditions, ask for approval, etc.
+    approval_payload = {
+        "environment_name": environment_name,
+        "state": "approved",
+        "comment": "Deployment approved by Pipeline Approvals app"
+    }
+    
+    # Use the install token to approve the deployment
+    approval_headers = {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"Bearer {install_token}",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "Content-Type": "application/json"
+    }
+    
+    # Approve the deployment
+    try:
+        approval_response = requests.post(
+            callback_url, 
+            headers=approval_headers, 
+            json=approval_payload
+        )
+        
+        if approval_response.status_code == 200 or approval_response.status_code == 204:
+            print(f"Deployment approved successfully!")
+            return "Deployment approved"
+        else:
+            print(f"Unexpected status code: {approval_response.status_code}")
+            print(f"Approval response: {approval_response.text}")
+            return f"ERROR: Unexpected status {approval_response.status_code}"
+        
+    except requests.exceptions.RequestException as e:
+        print(f"Error approving deployment: {e}")
+        print(f"Approval response: {approval_response.text if 'approval_response' in locals() else 'No response'}")
+        return "ERROR: Failed to approve deployment"
