@@ -1,0 +1,11 @@
+name: pipelines
+description: Configuration for deployment pipelines in GitHub Actions
+runtime:
+  name: python
+  options:
+    toolchain: pip
+    virtualenv: venv
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: github-python

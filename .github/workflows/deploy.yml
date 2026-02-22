@@ -30,7 +30,7 @@ jobs:
     needs: staging
     strategy:
       matrix:
-        environment: [production, production2]
+        environment: ${{ fromJson(vars.PRODUCTION_ENVIRONMENTS) }}
     environment: ${{ matrix.environment }}
     steps:
       - name: Deploy to ${{ matrix.environment }}
